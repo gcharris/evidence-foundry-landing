@@ -29,7 +29,7 @@
         </span>
       </a>
       <nav class="masthead-nav" aria-label="Primary">
-        <a class="btn" href="mailto:bot@evidencefoundry.com?subject=Early%20access%20%E2%80%94%20Evidence%20Foundry">Apply for early access</a>
+        <a class="btn" href="#apply">Apply for early access</a>
         <a class="btn primary" href="https://app.evidencefoundry.com">Sign in</a>
       </nav>
     </div>
@@ -51,7 +51,7 @@
           </p>
           <div class="hero-cta rise d3">
             <a class="btn primary lg" href="https://app.evidencefoundry.com">Sign in to the workspace</a>
-            <a class="btn lg" href="mailto:bot@evidencefoundry.com?subject=Early%20access%20%E2%80%94%20Evidence%20Foundry">Apply for early access</a>
+            <a class="btn lg" href="#apply">Apply for early access</a>
           </div>
           <p class="loop-strip rise d4">The loop · <b>sources + evidence → claims → writing → rigor review → export</b></p>
         </div>
@@ -305,8 +305,8 @@
                 </tr>
                 <tr>
                   <td class="stage">Accounts &amp; billing</td>
-                  <td class="desc">Arrive with the managed-platform integration. Today, sign-in is the door to the workspace itself.</td>
-                  <td class="st"><span class="chip st-neutral"><span class="dot"></span>Planned</span></td>
+                  <td class="desc">Reviewed-access applications and Seitiate+ passkey sign-in are live. Approval sends the passkey setup link; sign-in returns to the hosted workspace.</td>
+                  <td class="st"><span class="chip st-grounded"><span class="dot"></span>Live</span></td>
                 </tr>
               </tbody>
             </table>
@@ -317,7 +317,7 @@
     </section>
 
     <!-- ── Two doors ── -->
-    <section class="section" id="doors">
+    <section class="section" id="apply">
       <div class="wrap section-grid">
         <div class="section-label">
           <div class="n">05</div>
@@ -325,16 +325,45 @@
         </div>
         <div class="cta-band">
           <p class="eyebrow accent">Reviewed early access · individual replies</p>
-          <h2>Sign in, or write to us.</h2>
+          <h2>Sign in, or apply for reviewed access.</h2>
           <p class="body">
-            The workspace is open at app.evidencefoundry.com. Hosted accounts are
-            granted by review — a short note about your research and what you need to
-            defend is enough to start the conversation.
+            The workspace is open at app.evidencefoundry.com. Applications enter the
+            Evidence Foundry review queue in Seitiate+; after approval, the access
+            email carries the passkey setup link that returns you to the workspace.
           </p>
-          <div class="cta-actions">
-            <a class="btn primary lg" href="https://app.evidencefoundry.com">Sign in to the workspace</a>
-            <a class="btn lg" href="mailto:bot@evidencefoundry.com?subject=Early%20access%20%E2%80%94%20Evidence%20Foundry">Apply for early access</a>
-          </div>
+          <form
+            class="apply-form"
+            data-apply-form
+            data-apply-endpoint="https://seitiate-plus-backend-424038820765.us-central1.run.app/api/v1/verticals/evidence-foundry/apply"
+          >
+            <div class="form-grid">
+              <label>
+                <span>Email</span>
+                <input name="email" type="email" autocomplete="email" required />
+              </label>
+              <label>
+                <span>Name</span>
+                <input name="display_name" type="text" autocomplete="name" required />
+              </label>
+              <label>
+                <span>Organization</span>
+                <input name="organization" type="text" autocomplete="organization" />
+              </label>
+              <label>
+                <span>Role</span>
+                <input name="role" type="text" autocomplete="organization-title" />
+              </label>
+            </div>
+            <label class="full">
+              <span>What are you trying to defend?</span>
+              <textarea name="use_case" rows="5" required></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="btn primary lg" type="submit">Submit application</button>
+              <a class="btn lg" href="https://app.evidencefoundry.com">Sign in to the workspace</a>
+            </div>
+            <p class="form-status" data-apply-status role="status" aria-live="polite"></p>
+          </form>
           <p class="cta-contact">Contact · <a href="mailto:bot@evidencefoundry.com">bot@evidencefoundry.com</a></p>
         </div>
       </div>
@@ -354,12 +383,104 @@
       </a>
       <nav class="footer-links" aria-label="Footer">
         <a href="https://app.evidencefoundry.com">Sign in</a>
-        <a href="mailto:bot@evidencefoundry.com?subject=Early%20access%20%E2%80%94%20Evidence%20Foundry">Apply</a>
+        <a href="#apply">Apply</a>
         <a href="mailto:bot@evidencefoundry.com">Contact</a>
       </nav>
       <span class="footer-meta">© 2026 Evidence Foundry</span>
     </div>
   </footer>
+
+  <script>
+    (() => {
+      const form = document.querySelector('[data-apply-form]');
+      if (!form) return;
+
+      const endpoint = form.dataset.applyEndpoint;
+      const statusEl = document.querySelector('[data-apply-status]');
+      const submit = form.querySelector('button[type="submit"]');
+
+      function asText(value) {
+        return String(value || '').trim();
+      }
+
+      function optional(value) {
+        const text = asText(value);
+        return text ? text : null;
+      }
+
+      function setStatus(kind, message) {
+        if (!statusEl) return;
+        statusEl.className = `form-status ${kind ? `is-${kind}` : ''}`.trim();
+        statusEl.textContent = message;
+      }
+
+      async function readResponse(response) {
+        const text = await response.text();
+        if (!text) return {};
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { message: text };
+        }
+      }
+
+      function errorMessage(payload, fallback) {
+        const detail = payload && payload.detail;
+        if (typeof detail === 'string') return detail;
+        if (detail && typeof detail.message === 'string') return detail.message;
+        if (payload && typeof payload.message === 'string') return payload.message;
+        return fallback;
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!endpoint) {
+          setStatus('error', 'Application service is not configured. Please write to bot@evidencefoundry.com.');
+          return;
+        }
+        if (!form.reportValidity()) return;
+
+        const data = new FormData(form);
+        const payload = {
+          email: asText(data.get('email')),
+          display_name: asText(data.get('display_name')),
+          organization: optional(data.get('organization')),
+          role: optional(data.get('role')),
+          use_case: asText(data.get('use_case')),
+          metadata: {
+            source: 'evidencefoundry.com',
+            page_url: window.location.href,
+            referrer: document.referrer || null,
+          },
+        };
+
+        submit.disabled = true;
+        setStatus('pending', 'Submitting application...');
+
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const body = await readResponse(response);
+          if (response.status === 409) {
+            setStatus('pending', errorMessage(body, 'That application is already in review.'));
+            return;
+          }
+          if (!response.ok) {
+            throw new Error(errorMessage(body, `Application failed (${response.status}).`));
+          }
+          form.reset();
+          setStatus('success', 'Application received. We will review it and send next steps by email.');
+        } catch (error) {
+          setStatus('error', error instanceof Error ? error.message : 'Application failed. Please try again.');
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    })();
+  </script>
 
 </body>
 </html>

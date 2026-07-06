@@ -701,6 +701,76 @@ a:hover {
   flex-wrap: wrap;
   margin-top: 30px;
 }
+.apply-form {
+  margin-top: 30px;
+  display: grid;
+  gap: 16px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.apply-form label {
+  display: grid;
+  gap: 6px;
+}
+.apply-form label span {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.apply-form input,
+.apply-form textarea {
+  width: 100%;
+  border: 1px solid var(--rule-2);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 0 rgba(28, 26, 23, 0.02);
+}
+.apply-form textarea {
+  resize: vertical;
+  min-height: 126px;
+  line-height: 1.55;
+}
+.apply-form input:focus,
+.apply-form textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.form-status {
+  min-height: 21px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.form-status.is-pending {
+  color: var(--st-declared);
+}
+.form-status.is-success {
+  color: var(--st-grounded);
+}
+.form-status.is-error {
+  color: var(--st-unsupported);
+}
+.apply-form button[disabled] {
+  opacity: 0.72;
+  cursor: progress;
+}
 .cta-contact {
   margin-top: 22px;
   font-family: var(--font-mono);
@@ -796,5 +866,12 @@ footer {
   .masthead-nav .btn {
     padding: 8px 13px;
     font-size: 12.5px;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 }

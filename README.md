@@ -14,8 +14,9 @@ read as one product. Tokens in `styles.css` mirror
 `research-facility/frontend/src/styles/tokens.css`; keep them in sync by hand.
 Fonts: Newsreader (display serif) + IBM Plex Sans/Mono, loaded from Google Fonts.
 
-Static only: no build step, no JS, no app logic. The CTAs are plain links
-(`app.evidencefoundry.com` and `mailto:bot@evidencefoundry.com`).
+Static only: no build step. The sign-in CTA points at
+`app.evidencefoundry.com`; the reviewed-access application form posts JSON to
+the Seitiate+ vertical lifecycle endpoint for `evidence-foundry`.
 
 ## Deploy — GitHub Pages
 
