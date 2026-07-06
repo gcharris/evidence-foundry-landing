@@ -6,10 +6,13 @@
   <title>Evidence Foundry — a truth-first research workspace</title>
   <meta name="description" content="Evidence Foundry is a research workspace for scholars who must defend what they write. Sources, evidence, claims, writing, rigor review, and export — with every major assertion linked to the record that supports it." />
   <meta name="theme-color" content="#f4f1ea" />
+  <link rel="canonical" href="https://evidencefoundry.com/" />
+  <meta property="og:site_name" content="Evidence Foundry" />
   <meta property="og:title" content="Evidence Foundry — a truth-first research workspace" />
-  <meta property="og:description" content="Every claim in the manuscript, accountable to its evidence. Sources, evidence, claims, writing, rigor review, and export in one scholarly instrument." />
+  <meta property="og:description" content="Every claim in the manuscript, accountable to its evidence. Sources, evidence, claims, writing, rigor review, and export in one scholarly instrument. Reviewed-access beta." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://evidencefoundry.com/" />
+  <meta name="twitter:card" content="summary" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,8 +32,8 @@
         </span>
       </a>
       <nav class="masthead-nav" aria-label="Primary">
-        <a class="btn" href="#apply">Apply for early access</a>
-        <a class="btn primary" href="https://app.evidencefoundry.com">Sign in</a>
+        <a class="btn" href="https://app.evidencefoundry.com">Sign in</a>
+        <a class="btn primary" href="#apply">Apply for reviewed access</a>
       </nav>
     </div>
   </header>
@@ -41,7 +44,7 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <p class="eyebrow accent rise d1">Sources · evidence · claims · writing · review · export</p>
+          <p class="eyebrow accent rise d1">Truth-first research workspace · reviewed-access beta</p>
           <h1 class="rise d1">Every claim in the manuscript, <em>accountable to its evidence.</em></h1>
           <p class="lede rise d2">
             Evidence Foundry is a workspace for researchers who must defend what they
@@ -50,8 +53,8 @@
             not yet known — from the first imported dataset to the exported chapter.
           </p>
           <div class="hero-cta rise d3">
-            <a class="btn primary lg" href="https://app.evidencefoundry.com">Sign in to the workspace</a>
-            <a class="btn lg" href="#apply">Apply for early access</a>
+            <a class="btn primary lg" href="#apply">Apply for reviewed access</a>
+            <a class="btn lg" href="https://app.evidencefoundry.com">Sign in to the workspace</a>
           </div>
           <p class="loop-strip rise d4">The loop · <b>sources + evidence → claims → writing → rigor review → export</b></p>
         </div>
@@ -261,6 +264,15 @@
                 record, not the prose.
               </p>
             </div>
+            <div class="card">
+              <div class="card-kicker">For</div>
+              <h3>Researcher-developers</h3>
+              <p>
+                Field branches are how instruments join the trunk: a pipeline that
+                emits evidence objects can feed the workspace. If you want to build
+                one for your method, say so in your application.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -304,9 +316,14 @@
                   <td class="st"><span class="chip st-neutral"><span class="dot"></span>Planned</span></td>
                 </tr>
                 <tr>
-                  <td class="stage">Accounts &amp; billing</td>
-                  <td class="desc">Reviewed-access applications and Seitiate+ passkey sign-in are live. Approval sends the passkey setup link; sign-in returns to the hosted workspace.</td>
+                  <td class="stage">Access &amp; sign-in</td>
+                  <td class="desc">Reviewed-access applications and passkey sign-in are live. Approval sends the passkey setup link by email; sign-in returns to the hosted workspace.</td>
                   <td class="st"><span class="chip st-grounded"><span class="dot"></span>Live</span></td>
+                </tr>
+                <tr>
+                  <td class="stage">Data governance</td>
+                  <td class="desc">Beta work starts with non-sensitive, synthetic, or explicitly approved data until the governance framework is finalized.</td>
+                  <td class="st"><span class="chip st-declared"><span class="dot"></span>Policy</span></td>
                 </tr>
               </tbody>
             </table>
@@ -321,15 +338,17 @@
       <div class="wrap section-grid">
         <div class="section-label">
           <div class="n">05</div>
-          <div class="t">Two doors</div>
+          <div class="t">Reviewed access</div>
         </div>
         <div class="cta-band">
-          <p class="eyebrow accent">Reviewed early access · individual replies</p>
-          <h2>Sign in, or apply for reviewed access.</h2>
+          <p class="eyebrow accent">Reviewed access · individual replies</p>
+          <h2>Apply for reviewed access.</h2>
           <p class="body">
-            The workspace is open at app.evidencefoundry.com. Applications enter the
-            Evidence Foundry review queue in Seitiate+; after approval, the access
-            email carries the passkey setup link that returns you to the workspace.
+            Access is granted by review because the workspace touches scholarly work
+            and trust. Applications are read individually — tell us in plain terms
+            what you research and what you need to keep defensible. Approval arrives
+            by email from bot@evidencefoundry.com with the sign-in setup link; beta
+            projects start with non-sensitive, synthetic, or explicitly approved data.
           </p>
           <form
             class="apply-form"
@@ -346,23 +365,30 @@
                 <input name="display_name" type="text" autocomplete="name" required />
               </label>
               <label>
-                <span>Organization</span>
+                <span>Institution or organization</span>
                 <input name="organization" type="text" autocomplete="organization" />
               </label>
               <label>
                 <span>Role</span>
-                <input name="role" type="text" autocomplete="organization-title" />
+                <input name="role" type="text" autocomplete="organization-title" placeholder="Doctoral candidate · PI · administrator · developer" />
               </label>
             </div>
             <label class="full">
               <span>What are you trying to defend?</span>
               <textarea name="use_case" rows="5" required></textarea>
+              <small class="hint">Your project and what must stay defensible — a dissertation, a paper, a lab's output, or a field branch you want to build. A few sentences is enough.</small>
             </label>
+            <p class="hp" aria-hidden="true">
+              <label>Leave this field empty
+                <input name="website" type="text" tabindex="-1" autocomplete="off" />
+              </label>
+            </p>
             <div class="form-actions">
               <button class="btn primary lg" type="submit">Submit application</button>
               <a class="btn lg" href="https://app.evidencefoundry.com">Sign in to the workspace</a>
             </div>
-            <p class="form-status" data-apply-status role="status" aria-live="polite"></p>
+            <p class="form-note">This form sends only what you enter above. Replies come from bot@evidencefoundry.com.</p>
+            <p class="form-status" data-apply-status role="status" aria-live="polite" hidden></p>
           </form>
           <p class="cta-contact">Contact · <a href="mailto:bot@evidencefoundry.com">bot@evidencefoundry.com</a></p>
         </div>
@@ -408,10 +434,20 @@
         return text ? text : null;
       }
 
-      function setStatus(kind, message) {
+      function setStatus(kind, message, withContact) {
         if (!statusEl) return;
         statusEl.className = `form-status ${kind ? `is-${kind}` : ''}`.trim();
+        statusEl.hidden = false;
         statusEl.textContent = message;
+        if (withContact) {
+          statusEl.appendChild(document.createTextNode(' If this repeats, write to '));
+          const a = document.createElement('a');
+          a.href = 'mailto:bot@evidencefoundry.com';
+          a.textContent = 'bot@evidencefoundry.com';
+          statusEl.appendChild(a);
+          statusEl.appendChild(document.createTextNode('.'));
+        }
+        statusEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
 
       async function readResponse(response) {
@@ -441,6 +477,11 @@
         if (!form.reportValidity()) return;
 
         const data = new FormData(form);
+        if (asText(data.get('website'))) {
+          form.reset();
+          setStatus('success', 'Application received. We will review it and send next steps by email.');
+          return;
+        }
         const payload = {
           email: asText(data.get('email')),
           display_name: asText(data.get('display_name')),
@@ -465,16 +506,19 @@
           });
           const body = await readResponse(response);
           if (response.status === 409) {
-            setStatus('pending', errorMessage(body, 'That application is already in review.'));
+            setStatus('note', errorMessage(body, 'An application for this email is already in review — no need to resubmit.'));
             return;
           }
           if (!response.ok) {
-            throw new Error(errorMessage(body, `Application failed (${response.status}).`));
+            throw new Error(errorMessage(body, `The application could not be submitted (error ${response.status}).`));
           }
           form.reset();
-          setStatus('success', 'Application received. We will review it and send next steps by email.');
+          setStatus('success', 'Application received — it is in the review queue. Next steps arrive by email from bot@evidencefoundry.com.');
         } catch (error) {
-          setStatus('error', error instanceof Error ? error.message : 'Application failed. Please try again.');
+          const message = error instanceof TypeError
+            ? 'The application could not be sent — check your connection and try again.'
+            : error instanceof Error ? error.message : 'The application could not be submitted.';
+          setStatus('error', message, true);
         } finally {
           submit.disabled = false;
         }
