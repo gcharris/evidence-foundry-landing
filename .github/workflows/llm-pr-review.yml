@@ -1,0 +1,48 @@
+name: LLM PR review
+
+# Independent reviewer: on every PR, DeepSeek (via the engine's vault key) reads
+# the diff, posts a plain review, and sets the required `llm-review` status check.
+# Branch protection requires `llm-review`, so nothing merges without a real review.
+#
+# Injection-safe: no PR title/body/ref free-text reaches any run: step; the only
+# untrusted input (the diff) is fetched by the script and sent to the model as
+# data, never interpolated into a shell command. The PR number reaches the script
+# only through the env: block (the pattern the security guide endorses).
+#
+# Required repo config (Settings -> Secrets and variables -> Actions):
+#   secrets.ENGINE_URL  — deployed engine base URL
+#   secrets.ENGINE_KEY  — ops/director key the /llm/review endpoint accepts (NOT an LLM key;
+#                         the DeepSeek key stays in the engine vault). Never logged.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+concurrency:
+  group: llm-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run independent review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ENGINE_URL: ${{ secrets.ENGINE_URL }}
+          ENGINE_KEY: ${{ secrets.ENGINE_KEY }}   # the review-ONLY token
+          REVIEW_TENANT: ${{ vars.REVIEW_TENANT }} # non-secret tenant id whose vault DeepSeek key runs the review
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/llm_pr_review.py
