@@ -1,0 +1,59 @@
+name: Director-approved clearance + merge
+
+# NON-BYPASS clearance for agent-authored sensitive-path PRs.
+#
+# The required `llm-review` check is pinned to GitHub Actions (app_id 15368), so only a status
+# from GitHub Actions satisfies branch protection. When the merge-bot App adds the
+# `director-approved` label to a PR — which only happens on the Director's authenticated governed
+# approval (the phone tap, routed through the engine) — this workflow runs AS GitHub Actions,
+# sets `llm-review` = success (the pinned app), and merges. Branch protection is satisfied by the
+# correct app; nothing is admin-overridden.
+#
+# Security: the job runs ONLY when (a) the label is `director-approved` AND (b) the labeler is the
+# merge-bot App. A human GitHub identity (which is what every agent shares) cannot forge the App
+# as the label's sender, so an agent cannot self-clear a gate by adding the label itself.
+#
+# Injection-safe: untrusted github.event.* values appear only in the `if:` guard and the env:
+# block (SHA/number/repo — no free-text), never interpolated into a run: command.
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
+jobs:
+  clear-and-merge:
+    if: >-
+      github.event.label.name == 'director-approved' &&
+      github.event.sender.login == 'claude-ide-seitiate-merge-bot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set llm-review success (as GitHub Actions) and merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          echo "Director-approved clearance for ${REPO}#${PR_NUMBER} (head ${HEAD_SHA})"
+          # 1) Satisfy the app-pinned required check: this GITHUB_TOKEN status is authored by
+          #    github-actions (app_id 15368) — exactly what branch protection requires.
+          gh api -X POST "repos/${REPO}/statuses/${HEAD_SHA}" \
+            -f state=success -f context=llm-review \
+            -f "description=Cleared by Director (governed phone approval)"
+          # 2) Merge, retrying to absorb branch-protection propagation lag after the status set.
+          for attempt in 1 2 3 4 5 6; do
+            if gh pr merge "${PR_NUMBER}" --repo "${REPO}" --squash; then
+              echo "Merged on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Merge not ready (attempt ${attempt}); waiting for branch protection to propagate..."
+            sleep 5
+          done
+          echo "::error::Could not merge after clearing the gate (branch protection still blocking)."
+          exit 1
