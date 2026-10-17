@@ -5,6 +5,7 @@ Run with: python3 -B -m unittest discover -s tests -v
 
 from pathlib import Path
 import re
+import subprocess
 import unittest
 
 
@@ -12,25 +13,37 @@ ROOT = Path(__file__).resolve().parents[1]
 # Match shell commands and quoted argument sequences, including multiline lists
 # and shell continuations. Inspect source without executing workflows or scripts.
 SEPARATOR = r"(?:\s|,|\\\r?\n)+"
+GH = r"(?<![\w-])['\"]?gh['\"]?"
 MERGE_COMMAND = re.compile(
-    r"(?<![\w-])['\"]?gh['\"]?"
+    GH
+    + r"(?:" + SEPARATOR + r"['\"]?--repo['\"]?" + SEPARATOR + r"['\"]?[^\s'\",]+['\"]?)?"
     + SEPARATOR
     + r"['\"]?pr['\"]?"
     + SEPARATOR
     + r"['\"]?merge(?![\w-])"
+    + "|"
+    + GH
+    + SEPARATOR
+    + r"['\"]?api['\"]?"
+    + SEPARATOR
+    + r"['\"]?(?:-X|--method)['\"]?"
+    + SEPARATOR
+    + r"['\"]?PUT['\"]?"
+    + SEPARATOR
+    + r"['\"]?[^\s'\",]*/pulls/\d+/merge(?![\w-])"
 )
 
 
 def merge_command_paths(root: Path) -> list[Path]:
-    workflows = root / ".github" / "workflows"
-    sources = sorted(
-        path for path in workflows.rglob("*")
-        if path.is_file() and path.suffix in {".yml", ".yaml"}
-    )
-    sources.append(root / ".github" / "scripts" / "llm_pr_review.py")
+    tracked = subprocess.run(
+        ["git", "ls-files", "-z"], cwd=root, check=True, capture_output=True
+    ).stdout.decode("utf-8").split("\0")
+    guard = Path(__file__).resolve().relative_to(root)
     return [
-        path.relative_to(root) for path in sources
-        if MERGE_COMMAND.search(path.read_text(encoding="utf-8"))
+        Path(name) for name in sorted(filter(None, tracked))
+        if Path(name) != guard
+        and (root / name).is_file()
+        and MERGE_COMMAND.search((root / name).read_text(encoding="utf-8", errors="replace"))
     ]
 
 
@@ -51,6 +64,8 @@ class MergePathRetirementTests(unittest.TestCase):
             'subprocess.run(["gh", "pr", "merge", pr], check=True)',
             "subprocess.run(['gh', 'pr', 'merge', pr])",
             '["gh",\n "pr",\n "merge"]',
+            'gh --repo OWNER/REPO pr merge 42',
+            'gh api -X PUT repos/OWNER/REPO/pulls/42/merge',
         ):
             with self.subTest(source=source):
                 self.assertIsNotNone(MERGE_COMMAND.search(source))
