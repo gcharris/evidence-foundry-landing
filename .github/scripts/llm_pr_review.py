@@ -2,7 +2,7 @@
 """Independent LLM PR reviewer + seriousness router (Phase 1).
 
 On a PR event: read the real diff and scale review *rigor* to the change's blast
-radius, then set the required `llm-review` status check.
+radius, then set the advisory `llm-review` status check.
 
 The whole feature is one number — a **seriousness tier** derived from the changed
 files (the deterministic surface floor, §4.1 of the design):
@@ -202,7 +202,7 @@ def build_confirm_comment(tier: int, verdict: str, reasoning: str) -> str:
     if tier == 0 and not green:
         lines += ["", "> Tier 0 auto-passes (low blast radius); the note above is advisory only."]
     lines += ["", "<sub>Seriousness router · single confirm review · "
-                  "`llm-review` reflects this. See docs/design/PR-REVIEW-SERIOUSNESS-ROUTER.md.</sub>"]
+                  "advisory `llm-review` status check reflects this. See docs/design/PR-REVIEW-SERIOUSNESS-ROUTER.md.</sub>"]
     return "\n".join(lines)
 
 
@@ -229,7 +229,7 @@ def build_panel_comment(hits: list[str], results: list[tuple[str, dict]]) -> str
                 fsev = str(fnd.get("severity", "?")).upper()
                 lines.append(f"    - `{fsev}` {fnd.get('summary', '').strip()}")
     lines += ["", "<sub>Seriousness router · 4-lens adversarial panel (attack-mode) · "
-                  "`llm-review` held red for the Director. docs/design/PR-REVIEW-SERIOUSNESS-ROUTER.md.</sub>"]
+                  "advisory `llm-review` status check held red for the Director. docs/design/PR-REVIEW-SERIOUSNESS-ROUTER.md.</sub>"]
     return "\n".join(lines)
 
 

@@ -1,8 +1,7 @@
 name: LLM PR review
 
-# Independent reviewer: on every PR, DeepSeek (via the engine's vault key) reads
-# the diff, posts a plain review, and sets the required `llm-review` status check.
-# Branch protection requires `llm-review`, so nothing merges without a real review.
+# main requires the `test` status check (merge-path retirement guard); `llm-review` is
+# advisory. land_code is the sole merge path under DOCKET-2026-10-16-15.
 #
 # Injection-safe: no PR title/body/ref free-text reaches any run: step; the only
 # untrusted input (the diff) is fetched by the script and sent to the model as
@@ -28,6 +27,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -B -m unittest discover -s tests -v
+
   review:
     runs-on: ubuntu-latest
     steps:
