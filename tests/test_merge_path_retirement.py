@@ -14,23 +14,27 @@ ROOT = Path(__file__).resolve().parents[1]
 # and shell continuations. Inspect source without executing workflows or scripts.
 SEPARATOR = r"(?:\s|,|\\\r?\n)+"
 GH = r"(?<![\w-])['\"]?gh['\"]?"
+CURL = r"(?<![\w-])['\"]?curl['\"]?"
+# gh's repo selector may sit between `gh` and `pr merge`: -R X, --repo X, --repo=X.
+REPO_FLAG = (
+    r"(?:" + SEPARATOR + r"['\"]?(?:-R|--repo)['\"]?(?:" + SEPARATOR + r"|=)"
+    + r"['\"]?[^\s'\",]+['\"]?)?"
+)
+PUT = r"(?:(?:-X|--request|--method)(?:" + SEPARATOR + r"|=)|-X)['\"]?PUT['\"]?"
+# /pulls/<number or interpolated name>/merge, e.g. /pulls/5/merge, /pulls/${PR}/merge.
+PULL_MERGE_URL = r"/pulls/[^\s'\",/]+/merge(?![\w-])"
 MERGE_COMMAND = re.compile(
     GH
-    + r"(?:" + SEPARATOR + r"['\"]?--repo['\"]?" + SEPARATOR + r"['\"]?[^\s'\",]+['\"]?)?"
+    + REPO_FLAG
     + SEPARATOR
     + r"['\"]?pr['\"]?"
     + SEPARATOR
     + r"['\"]?merge(?![\w-])"
-    + "|"
-    + GH
-    + SEPARATOR
-    + r"['\"]?api['\"]?"
-    + SEPARATOR
-    + r"['\"]?(?:-X|--method)['\"]?"
-    + SEPARATOR
-    + r"['\"]?PUT['\"]?"
-    + SEPARATOR
-    + r"['\"]?[^\s'\",]*/pulls/\d+/merge(?![\w-])"
+    + "|(?:" + GH + SEPARATOR + r"['\"]?api['\"]?" + "|" + CURL + ")"
+    + r"[^\n]*?"
+    + PUT
+    + r"[^\n]*?"
+    + PULL_MERGE_URL
 )
 
 
@@ -66,6 +70,12 @@ class MergePathRetirementTests(unittest.TestCase):
             '["gh",\n "pr",\n "merge"]',
             'gh --repo OWNER/REPO pr merge 42',
             'gh api -X PUT repos/OWNER/REPO/pulls/42/merge',
+            'gh pr merge "${PR_NUMBER}" --repo "${REPO}" --squash',
+            'gh -R OWNER/REPO pr merge 42',
+            'curl -X PUT https://api.github.com/repos/O/R/pulls/5/merge',
+            'gh api --method=PUT repos/O/R/pulls/5/merge',
+            'gh api --method PUT "repos/${REPO}/pulls/${PR_NUMBER}/merge"',
+            'curl -X PUT "$API/repos/O/R/pulls/$PR/merge"',
         ):
             with self.subTest(source=source):
                 self.assertIsNotNone(MERGE_COMMAND.search(source))
